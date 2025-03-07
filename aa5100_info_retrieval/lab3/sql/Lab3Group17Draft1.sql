@@ -1,6 +1,7 @@
---use master;
---go
+use master;
+go
 
+-- IF RUNNING THE FIRST TIME KEEP THESE COMMENTED OUT. These lines are only used in develop, and drop the database everytime it's run.
 --alter database lab3_group17 set single_user with rollback immediate;
 --go
 
@@ -69,14 +70,14 @@ create table sales.Inventory (
 
 create table sales.CustomerPurchase ( -- an individual purchase of an item within an order. each row is unique by (CustomerID, OrderID, ItemID)
 	CustomerID int not null,
-	OrderID int not null,
+	OrderID int unique not null,
 	EmployeeID int not null,
 	PurchaseDate date not null,
 	ItemID int not null, 
 	Quantity int not null, 
 	Price float not null, -- itemid price * quantity
-	constraint PK_CustomerPurchase primary key (CustomerID, OrderID, ItemID),
-	constraint FK_OrderCustomer foreign key (CustomerID) references sales.Customer (CustomerID),
+	constraint PK_CustPurchase primary key (CustomerID, OrderID, ItemID),
+	constraint FK_PurchaseCustID foreign key (CustomerID) references sales.Customer (CustomerID),
 	constraint FK_PurchaseSalesperson foreign key (EmployeeID) references HR.Employee (EmployeeID),
 	constraint FK_OrderItem foreign key (ItemID) references sales.Inventory (ItemID)
 );
@@ -88,8 +89,9 @@ create table sales.CustomerOrder ( -- the entirity of an order. each row is uniq
 	PurchaseDate date not null,
 	ItemsPurchased int not null, -- sum of all quantity for the orderid
 	TotalPrice float not null, -- sum of all price for the order id
-	constraint PK_CustomerPurchase primary key (CustomerID, OrderID),
-	constraint FK_Order foreign key (OrderID) references sales.CustomerPurchase (OrderID),
+	constraint PK_CustOrder primary key (CustomerID, OrderID),
+	constraint FK_OrderCustID foreign key (CustomerID) references sales.Customer (CustomerID),
+	constraint FK_CustOrderID foreign key (OrderID) references sales.CustomerPurchase (OrderID),
 	constraint FK_OrderSalesperson foreign key (EmployeeID) references HR.Employee (EmployeeID)
 );
 GO
